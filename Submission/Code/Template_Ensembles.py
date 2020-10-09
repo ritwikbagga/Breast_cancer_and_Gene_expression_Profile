@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 from sklearn import metrics
 import math
+import sklearn
 from sklearn.tree import DecisionTreeClassifier
 
 def load_data():
@@ -26,6 +27,7 @@ def load_data():
 
 
 def main():
+
     np.random.seed(0)
     train_X, train_y, test_X, test_y = load_data()
 
