@@ -19,8 +19,11 @@ class SVM(object):
         C           : regularization parameter (default: 1)
         """
         self.C = C
+        self.w = None
+        self.b = None
 
     def fit(self, X, y, lr=0.002, iterations=10000):
+        pass
         """
         Fit the model using the training data.
 
@@ -33,13 +36,15 @@ class SVM(object):
         lr          :   learning rate
         iterations  :   number of iterations
         """
-        n_samples, n_features = X.shape
-
-        # Initialize the parameters wb
-
-        # initialize any container needed for save results during training
-
-        for i in range(iterations):
+        # n_samples, n_features = X.shape
+        #
+        # # Initialize the parameters wb
+        # wb = np.randn(n_features+1)
+        # w, b = SVM.unpack_wb(wb, n_features)
+        # # initialize any container needed for save results during training
+        # self.set_params(w, b)
+        # best_obj_
+        # for i in range(iterations):
             # calculate learning rate with iteration number i
 
             # calculate the subgradients
@@ -60,7 +65,8 @@ class SVM(object):
 
         # optinally return recorded objective function values (for debugging purpose) to see
         # if the model is converging
-        return 
+        #return
+
 
     @staticmethod
     def unpack_wb(wb, n_features):
@@ -77,7 +83,6 @@ class SVM(object):
         Helper function for g(x) = WX+b
         """
         n_samples, n_features = X.shape
-
         w,b = self.unpack_wb(wb, n_features)
         gx = np.dot(w, X.T) + b
 
@@ -121,7 +126,8 @@ class SVM(object):
         # Calculate the objective function value 
         # Be careful with the hinge loss function
 
-        return obj
+        # return obj
+        pass
 
     def subgradient(self, wb, X, y):
         """
@@ -180,7 +186,8 @@ class SVM(object):
         # calculate the predictions
 
         # return the predictions
-        return y
+        # return y
+        pass
 
     def get_params(self):
         """
@@ -273,6 +280,15 @@ def plot_decision_boundary(clf, X, y, title='SVM'):
     plt.title(title)
     plt.show()
 
+def Q5(train_X, test_X, train_y, test_y):
+    train_X = train_X[:,:2]
+    test_X = test_X[:,:2]
+    for kernel in ('linear', 'poly', 'rbf'):
+        print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
+        svc_model = svm.SVC(kernel=kernel)
+        svc_model.fit( train_X , train_y)
+        plot_decision_boundary(svc_model, train_X, train_y, title='SVM with kernel: '+str(kernel))
+
 
 def main():
     # Set the seed for numpy random number generator
@@ -282,12 +298,33 @@ def main():
     # Load in the training data and testing data
     train_X, train_y, test_X, test_y = load_data()
 
+    #### THIS IS FOR Q4 ######
+    for kernel in ('linear', 'poly', 'rbf'):
+        print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
+        svc_model = svm.SVC(kernel=kernel)
+        svc_model.fit( train_X , train_y)
+        y_predict_test = svc_model.predict(test_X)
+        y_predict_train = svc_model.predict(train_X)
+        F1_test = metrics.f1_score(test_y, y_predict_test)
+        F1_train = metrics.f1_score(train_y, y_predict_train)
+        precision_test = metrics.precision_score(test_y, y_predict_test)
+        precision_train = metrics.precision_score(train_y, y_predict_train)
+        recall_test = metrics.recall_score(test_y, y_predict_test)
+        recall_train = metrics.recall_score(train_y, y_predict_train)
+        print("F1 score for test= "+str(F1_test))
+        print("Precision for test= "+ str(precision_test))
+        print("Recall for test= "+ str(recall_test))
+
+        print("F1 score for train= "+str(F1_train))
+        print("Precision for train= "+ str(precision_train))
+        print("Recall for train= "+ str(recall_train))
+    Q5(train_X, test_X, train_y, test_y) #This is for Q5 on SVM
+    breakpoint()
     # For using the first two dimensions of the data
-    #train_X = train_X[:,:2]
-    #test_X = test_X[:,:2]
 
 
-    clf = SVM(C=C)
+
+    clf = SVM(C=1)
     objs = clf.fit(train_X, train_y, lr=0.002, iterations=10000)
 
     train_preds  = clf.predict(train_X)
