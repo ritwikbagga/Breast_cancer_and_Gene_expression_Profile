@@ -21,9 +21,9 @@ class SVM(object):
         self.C = C
         self.w = None
         self.b = None
+        self.wb = None
 
     def fit(self, X, y, lr=0.002, iterations=10000):
-        pass
         """
         Fit the model using the training data.
 
@@ -36,36 +36,43 @@ class SVM(object):
         lr          :   learning rate
         iterations  :   number of iterations
         """
-        # n_samples, n_features = X.shape
-        #
-        # # Initialize the parameters wb
-        # wb = np.randn(n_features+1)
-        # w, b = SVM.unpack_wb(wb, n_features)
-        # # initialize any container needed for save results during training
-        # self.set_params(w, b)
-        # best_obj_
-        # for i in range(iterations):
+        n_samples, n_features = X.shape
+
+        # Initialize the parameters wb
+        wb = np.random.randn(n_features+1)
+        w, b = SVM.unpack_wb(wb, n_features)
+        # initialize any container needed for save results during training
+        self.set_params(w, b)
+        best_obj= None
+        best_wb = None
+        obj_list = []
+        for i in range(iterations):
+
             # calculate learning rate with iteration number i
-
+            lr_t = lr/((i+1)**0.5)
             # calculate the subgradients
-
+            sg = self.subgradient(wb, X, y)
             # update the parameter wb with the gradients
-
+            wb= wb-sg*lr_t
             # calculate the new objective function value
-
+            obj_f = self.objective(wb, X, y)
+            obj_list.append(obj_f)
+            if best_obj is None:
+                best_obj = obj_f
+                best_wb = wb
+            else:
+                if best_obj>=obj_f:
+                    best_obj = obj_f
+                    best_wb = wb
 
             # compare the current objective function value with the saved best value
             # update the best value if the current one is better
 
-            # Logging
-            #if (i+1)%1000 == 0:
-            #    print(f"Training step {i+1:6d}: LearningRate[{lr_t:.7f}], Objective[{f:.7f}]")
+        self.wb = best_wb
+        self.w, self.b = self.unpack_wb(best_wb, n_features)
+        return obj_list
 
-        # Save the best parameter found during training 
 
-        # optinally return recorded objective function values (for debugging purpose) to see
-        # if the model is converging
-        #return
 
 
     @staticmethod
@@ -122,12 +129,12 @@ class SVM(object):
         obj (float): value of the objective function evaluated on X and y.
         """
         n_samples, n_features = X.shape
+        hinge, hinge_mask = self.hinge_loss(X, y,wb)
+        # Calculate the objective function value
+        obj = self.C*(np.sum(hinge)+(np.sum(wb[:-1]**2))**0.5)
+        return obj
 
-        # Calculate the objective function value 
-        # Be careful with the hinge loss function
 
-        # return obj
-        pass
 
     def subgradient(self, wb, X, y):
         """
@@ -182,12 +189,15 @@ class SVM(object):
                 Predictions with values of -1 or 1.
         """
         # retrieve the parameters wb
-
+        wb = self.wb
         # calculate the predictions
-
+        pred= self.g(X, wb)
+        pred[pred>=0]=1
+        pred[pred<0]=-1
         # return the predictions
         # return y
-        pass
+        return pred
+
 
     def get_params(self):
         """
@@ -278,7 +288,7 @@ def plot_decision_boundary(clf, X, y, title='SVM', kernel=None):
     plt.ylabel('Second dimension')
     plt.xlim(xx.min(), xx.max())
     plt.title(title)
-    plt.savefig('../Figures/SVM_Q5_' + str(kernel) + '.png')
+    #plt.savefig('../Figures/SVM_Q5_' + str(kernel) + '.png')
     plt.show()
 
 def Q5(train_X, test_X, train_y, test_y):
@@ -298,9 +308,28 @@ def main():
     np.random.seed(0)
 
     # Load in the training data and testing data
+
     train_X, train_y, test_X, test_y = load_data()
 
+    print("################################################ Q3 SVM ####################################################")
+
+
+    clf = SVM(C=1)
+    objs = clf.fit(train_X, train_y, lr=0.002, iterations=10000)
+
+    train_preds  = clf.predict(train_X)
+    test_preds  = clf.predict(test_X)
+
+    print(f"f1_score [test,train]: [{metrics.f1_score(test_y, test_preds)}, {metrics.f1_score(train_y, train_preds)}]")
+    print(f"Precision [test,train]: [{metrics.precision_score(test_y, test_preds)}, {metrics.precision_score(train_y, train_preds)}]")
+    print(f"Recall [test,train]: [{metrics.recall_score(test_y, test_preds)}, {metrics.recall_score(train_y, train_preds)}]")
+
+    #plot_decision_boundary(clf, train_X, train_y)
+    #plot_decision_boundary(clf, train_X,train_y , title='SVM', kernel=None)
+
+
     #### THIS IS FOR Q4 ######
+    print("################################################ Q4 SVM ####################################################")
     for kernel in ('linear', 'poly', 'rbf'):
         print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
         svc_model = svm.SVC(kernel=kernel)
@@ -320,20 +349,14 @@ def main():
         print("F1 score for train= "+str(F1_train))
         print("Precision for train= "+ str(precision_train))
         print("Recall for train= "+ str(recall_train))
+    print("################################################ Q5 SVM ####################################################")
     Q5(train_X, test_X, train_y, test_y) #This is for Q5 on SVM
-    breakpoint()
+
     # For using the first two dimensions of the data
 
 
 
-    clf = SVM(C=1)
-    objs = clf.fit(train_X, train_y, lr=0.002, iterations=10000)
 
-    train_preds  = clf.predict(train_X)
-    test_preds  = clf.predict(test_X)
-
-    print(f"f1_score: [{metrics.f1_score(test_y, test_preds)}, {metrics.f1_score(train_y, train_preds)}]")
-    #plot_decision_boundary(clf, train_X, train_y)
 
 
 
