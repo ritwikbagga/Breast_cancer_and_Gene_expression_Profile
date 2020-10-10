@@ -245,7 +245,7 @@ def load_data():
 
     return train_X, train_y, test_X, test_y
 
-def plot_decision_boundary(clf, X, y, title='SVM'):
+def plot_decision_boundary(clf, X, y, title='SVM', kernel=None):
     """
     Helper function for plotting the decision boundary
 
@@ -278,16 +278,18 @@ def plot_decision_boundary(clf, X, y, title='SVM'):
     plt.ylabel('Second dimension')
     plt.xlim(xx.min(), xx.max())
     plt.title(title)
+    plt.savefig('../Figures/SVM_Q5_' + str(kernel) + '.png')
     plt.show()
 
 def Q5(train_X, test_X, train_y, test_y):
     train_X = train_X[:,:2]
     test_X = test_X[:,:2]
     for kernel in ('linear', 'poly', 'rbf'):
-        print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
+        #print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
         svc_model = svm.SVC(kernel=kernel)
         svc_model.fit( train_X , train_y)
-        plot_decision_boundary(svc_model, train_X, train_y, title='SVM with kernel: '+str(kernel))
+        plot_decision_boundary(svc_model, train_X, train_y, title='SVM with kernel: '+str(kernel), kernel=kernel)
+
 
 
 def main():

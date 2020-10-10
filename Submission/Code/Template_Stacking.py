@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import StackingClassifier
+from sklearn.ensemble import AdaBoostClassifier
 import pandas as pd
 # feel free to import any sklearn model here
 from numpy import mean
@@ -28,6 +29,8 @@ def get_models():
     models['svm'] = SVC(kernel = 'linear')
     models['bayes'] = GaussianNB()
     models['rf'] = RandomForestClassifier(n_estimators=150, max_depth=10)
+    dtc = DecisionTreeClassifier(max_depth = 3)
+    models['ADA'] = AdaBoostClassifier(n_estimators=100, base_estimator=dtc, learning_rate=0.1)
     return models
 
 
@@ -78,17 +81,19 @@ def main():
     train_X, train_y, test_X, test_y = load_data()
 
     #get models and evaluate
-    model_weights(train_X, train_y)
+    #model_weights(train_X, train_y)
 
     # Stacking models:
     # Create your stacked model using StackingClassifier
     level0 = list()
-    level0.append(('rf', RandomForestClassifier(n_estimators=150, max_depth=10)))
-    level0.append(('svm', SVC(C=1, kernel='linear')))
+    level0.append(('rf', RandomForestClassifier(n_estimators=150, max_depth=5)))
+    level0.append(('svm', SVC(C=1, kernel='rbf')))
+    dtc = DecisionTreeClassifier(max_depth=3)
+    level0.append(('ADA', AdaBoostClassifier(n_estimators=100, base_estimator=dtc, learning_rate=0.1)))
     level0.append(('lr', LogisticRegression()))
     level0.append(('bayes', GaussianNB()))
     level0.append(('knn', KNeighborsClassifier()))
-    level0.append(('cart', DecisionTreeClassifier()))
+
     # define meta learner model
     level1 = LogisticRegression()
     # define the stacking ensemble
