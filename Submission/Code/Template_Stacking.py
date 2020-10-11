@@ -18,20 +18,9 @@ from sklearn.naive_bayes import GaussianNB
 from matplotlib import pyplot
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import preprocessing
 
 
-
-def get_models():
-    models = dict()
-    models['lr'] = LogisticRegression()
-    models['knn'] = KNeighborsClassifier()
-    models['cart'] = DecisionTreeClassifier()
-    models['svm'] = SVC(kernel = 'linear')
-    models['bayes'] = GaussianNB()
-    models['rf'] = RandomForestClassifier(n_estimators=150, max_depth=10)
-    dtc = DecisionTreeClassifier(max_depth = 3)
-    models['ADA'] = AdaBoostClassifier(n_estimators=100, base_estimator=dtc, learning_rate=0.1)
-    return models
 
 
 def load_data():
@@ -49,39 +38,24 @@ def load_data():
     X = df[cols[2:-1]].to_numpy()
     y = df[cols[1]].to_numpy()
     y = (y=='M').astype(np.int) * 2 - 1
-
+    sc = preprocessing.StandardScaler()
     train_X = X[:-150]
+    #train_X = sc.fit_transform(train_X)
+
     train_y = y[:-150]
 
     test_X = X[-150:]
+    #test_X = sc.fit_transform(test_X)
     test_y = y[-150:]
+
 
     return train_X, train_y, test_X, test_y
 
-def model_weights(X, y):
-    models = get_models()
-    def evaluate_model(model, X, y):
-        cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
-        scores = cross_val_score(model, X, y, scoring='accuracy', cv=cv, n_jobs=-1, error_score='raise')
-        return scores
-    # evaluate the models and store results
-    results, names = list(), list()
-    for name, model in models.items():
-        scores = evaluate_model(model, X, y)
-        results.append(scores)
-        names.append(name)
-        print('>%s %.3f (%.3f)' % (name, mean(scores), std(scores)))
-    # plot model performance for comparison
-    plt.figure("distribution of accuracy scores for each algorithm")
-    plt.boxplot(results, labels=names, showmeans=True)
-    plt.show()
+
 def main():
 
     np.random.seed(0)
     train_X, train_y, test_X, test_y = load_data()
-
-    #get models and evaluate
-    #model_weights(train_X, train_y)
 
     # Stacking models:
     # Create your stacked model using StackingClassifier
@@ -90,19 +64,19 @@ def main():
     level0.append(('svm', SVC(C=1, kernel='rbf')))
     dtc = DecisionTreeClassifier(max_depth=3)
     level0.append(('ADA', AdaBoostClassifier(n_estimators=100, base_estimator=dtc, learning_rate=0.1)))
-    level0.append(('lr', LogisticRegression()))
+    level0.append(('lr', LogisticRegression( solver='liblinear')))
     level0.append(('bayes', GaussianNB()))
-    level0.append(('knn', KNeighborsClassifier()))
+
 
     # define meta learner model
     level1 = LogisticRegression()
     # define the stacking ensemble
-    model = StackingClassifier(estimators=level0, final_estimator=level1, cv=5)
+    model = StackingClassifier(estimators=level0, final_estimator=level1, cv=10)
     # fit the model on the training data
     model.fit(train_X, train_y)
     # Get and print f1-score on test data
     y_pred = model.predict(test_X)
-    F1_score = metrics.f1_score(y_pred, test_y , average = 'weighted')
-    print(F1_score)
+    F1_score = metrics.f1_score(y_pred, test_y , average= 'weighted')
+    print("ANS 3.1 - F1_score of model with stacking different models is: "+ str(F1_score))
 if __name__ == '__main__':
     main()

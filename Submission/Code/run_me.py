@@ -5,8 +5,8 @@ from Template_Stacking import  main as Stacking_main
 
 
 def main():
-    # SVM_main()
-    # E_main()
+    SVM_main()
+    E_main()
     Stacking_main()
 
 

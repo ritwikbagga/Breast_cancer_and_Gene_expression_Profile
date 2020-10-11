@@ -331,7 +331,7 @@ def main():
     #### THIS IS FOR Q4 ######
     print("################################################ Q4 SVM ####################################################")
     for kernel in ('linear', 'poly', 'rbf'):
-        print("#####This is SVM for kernel= "+ str(kernel)+ " ######")
+        print("##############  This is SVM for kernel= "+ str(kernel)+ " #################")
         svc_model = svm.SVC(kernel=kernel)
         svc_model.fit( train_X , train_y)
         y_predict_test = svc_model.predict(test_X)
@@ -349,7 +349,7 @@ def main():
         print("F1 score for train= "+str(F1_train))
         print("Precision for train= "+ str(precision_train))
         print("Recall for train= "+ str(recall_train))
-    print("################################################ Q5 SVM ####################################################")
+   # print("################################################ Q5 SVM ####################################################")
     Q5(train_X, test_X, train_y, test_y) #This is for Q5 on SVM
 
     # For using the first two dimensions of the data
